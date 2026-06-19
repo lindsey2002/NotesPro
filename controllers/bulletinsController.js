@@ -1,5 +1,13 @@
 const db = require('../db/connection');
 
+const getMention = (moyenne) => {
+  if (moyenne >= 16) return 'Excellent';
+  if (moyenne >= 14) return 'Très Bien';
+  if (moyenne >= 12) return 'Bien';
+  if (moyenne >= 10) return 'Passable';
+  return 'Insuffisant';
+};
+
 exports.generer = async (req, res) => {
   try {
     const { eleve_id, semestre_id } = req.params;
@@ -144,7 +152,10 @@ exports.generer = async (req, res) => {
       );
     }
 
-    res.json({ eleve_id, semestre_id, moyenne_generale, rang, details });
+    const mention = getMention(moyenne_generale);
+    const alerte = moyenne_generale < 10 ? 'Moyenne insuffisante, élève en difficulté !' : null;
+
+    res.json({ eleve_id, semestre_id, moyenne_generale, rang, mention, alerte, details });
 
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur', error: err.message });

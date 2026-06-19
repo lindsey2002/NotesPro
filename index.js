@@ -31,6 +31,9 @@ app.use('/api/consultation', consultationRoutes);
 const enseignantRoutes = require('./routes/enseignants');
 app.use('/api/enseignants', enseignantRoutes);
 
+const statsRoutes = require('./routes/stats');
+app.use('/api/stats', statsRoutes);
+
 app.get('/', (req, res) => {
   res.json({ message: 'NotesPro API en marche !' });
 });

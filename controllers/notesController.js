@@ -8,12 +8,12 @@ exports.create = async (req, res) => {
         'SELECT * FROM enseignant_matieres WHERE user_id = ? AND matiere_id = ? AND classe_id = ?',
         [req.user.id, matiere_id, classe_id]
       );
-    }
 
-    if (assignation.length === 0) {
-      return res.status(403).json({ 
-        message: 'Vous ne pouvez pas saisir des notes pour cette matière ou classe' 
-      });
+      if (assignation.length === 0) {
+        return res.status(403).json({ 
+          message: 'Vous ne pouvez pas saisir des notes pour cette matière ou classe' 
+        });
+      }
     }
 
     const [result] = await db.query(
@@ -73,6 +73,7 @@ exports.update = async (req, res) => {
         [req.params.id, req.user.id]
       );
 
+     
       if (existing.length === 0) {
         return res.status(403).json({ 
           message: 'Vous ne pouvez pas modifier cette note' 
@@ -82,6 +83,42 @@ exports.update = async (req, res) => {
 
     await db.query('UPDATE notes SET note = ? WHERE id = ?', [note, req.params.id]);
     res.json({ message: 'Note mise à jour' });
+
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur', error: err.message });
+  }
+};
+
+exports.createMasse = async (req, res) => {
+  try {
+    const { notes, matiere_id, classe_id, semestre_id, type_evaluation } = req.body;
+    // notes = [{ eleve_id: 1, note: 14 }, { eleve_id: 2, note: 16 }, ...]
+
+    // Si enseignant, vérifier l'assignation
+    if (req.user.role === 'enseignant') {
+      const [assignation] = await db.query(
+        'SELECT * FROM enseignant_matieres WHERE user_id = ? AND matiere_id = ? AND classe_id = ?',
+        [req.user.id, matiere_id, classe_id]
+      );
+      if (assignation.length === 0) {
+        return res.status(403).json({ 
+          message: 'Vous ne pouvez pas saisir des notes pour cette matière ou classe' 
+        });
+      }
+    }
+
+    // Insérer toutes les notes en une seule fois
+    const values = notes.map(n => [n.eleve_id, matiere_id, classe_id, semestre_id, n.note, type_evaluation]);
+    
+    await db.query(
+      'INSERT INTO notes (eleve_id, matiere_id, classe_id, semestre_id, note, type_evaluation) VALUES ?',
+      [values]
+    );
+
+    res.status(201).json({ 
+      message: `${notes.length} notes insérées avec succès`,
+      details: { matiere_id, classe_id, semestre_id, type_evaluation, nombre_notes: notes.length }
+    });
 
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur', error: err.message });
