@@ -28,6 +28,9 @@ app.use('/api/bulletins', bulletinsRoutes);
 const consultationRoutes = require('./routes/consultation');
 app.use('/api/consultation', consultationRoutes);
 
+const enseignantRoutes = require('./routes/enseignants');
+app.use('/api/enseignants', enseignantRoutes);
+
 app.get('/', (req, res) => {
   res.json({ message: 'NotesPro API en marche !' });
 });
