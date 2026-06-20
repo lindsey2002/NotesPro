@@ -37,6 +37,18 @@ exports.update = async (req, res) => {
 
 exports.delete = async (req, res) => {
   try {
+    // Vérifier si la matière a des notes
+    const [notes] = await db.query(
+      'SELECT COUNT(*) as total FROM notes WHERE matiere_id = ?',
+      [req.params.id]
+    );
+
+    if (notes[0].total > 0) {
+      return res.status(400).json({ 
+        message: `Impossible de supprimer : cette matière a ${notes[0].total} note(s) associée(s).` 
+      });
+    }
+
     await db.query('DELETE FROM matieres WHERE id = ?', [req.params.id]);
     res.json({ message: 'Matière supprimée' });
   } catch (err) {

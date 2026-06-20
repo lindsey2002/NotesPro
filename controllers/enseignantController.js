@@ -69,6 +69,18 @@ exports.getMatieres = async (req, res) => {
   }
 };
 
+exports.getListe = async (req, res) => {
+  try {
+    const [enseignants] = await db.query(
+      'SELECT id, name, email FROM users WHERE role = ?',
+      ['enseignant']
+    );
+    res.json(enseignants);
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur', error: err.message });
+  }
+};
+
 exports.supprimer = async (req, res) => {
   try {
     await db.query('DELETE FROM enseignant_matieres WHERE id = ?', [req.params.id]);

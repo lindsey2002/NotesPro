@@ -9,5 +9,6 @@ router.post('/assigner', auth, role('admin'), enseignantController.assigner);
 router.get('/', auth, role('admin'), enseignantController.getAll);
 router.get('/:user_id/matieres', auth, enseignantController.getMatieres);
 router.delete('/:id', auth, role('admin'), enseignantController.supprimer);
+router.get('/liste', auth, role('admin'), enseignantController.getListe);
 
 module.exports = router;
